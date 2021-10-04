@@ -1,0 +1,8 @@
+[package]
+name = "webserver"
+version = "0.1.0"
+authors = ["Your Name <student@informatik.hu-berlin.de>", "Your Partner <partner@informatik.hu-berlin.de"]
+edition = "2018"
+
+[dependencies]
+rocket = "0.4"
