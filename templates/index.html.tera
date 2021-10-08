@@ -1,0 +1,46 @@
+{% import "macros" as m %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Rust Webserver</title>
+    <link rel="stylesheet" href="/chota.min.css">
+    <style>
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Rust Webserver</h1>
+    </div>
+
+    <div class="container">
+      <form action="/upload" method="get">
+        <input type="submit" value="Upload new file" class="is-full-width" />
+      </form>
+    </div>
+
+    <div class="container">
+      <fieldset>
+        <legend>Files</legend>
+        <ul>
+          {% for path in paths %}
+            <li> {{ path }} <a href="/download/{{ path }}" download>download</a> <a href="/delete/{{ path }}">delete</a> </li>
+          {% endfor %}
+        </ul>
+      </fieldset>
+    </div>
+
+    <div class="container">
+      <form action="/logout" method="post">
+        <input type="submit" value="Logout" class="is-full-width" />
+      </form>
+    </div>
+  </body>
+</html>
