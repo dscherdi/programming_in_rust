@@ -3,7 +3,7 @@
  * ! clean up .tera files (add a base template file, add error template, add "Go back" template file)
  * ! + better error handling
  * ! update login tokens: add e.g. tokens.txt with valid tokens
- * 
+ *
  * ? subfolder support for uploading/downloading
  * ? admin role (users can only download, admins can upload/delete)
  * ? different groups (each have their own files they can access)
@@ -25,9 +25,28 @@ use std::{
     str::FromStr
 };
 use rocket_dyn_templates::Template;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-struct User;
+#[derive(Serialize, Deserialize, rocket::FromForm)]
+struct User {
+	username: String,
+	password: String,
+}
+
+impl PartialEq for User {
+	fn eq(&self, other: &Self) -> bool {
+		self.username == other.username && self.password == other.password
+	}
+}
+
+fn user_exists(username: &str) -> Option<User> {
+	for user in fetch_users() {
+		if user.username == username {
+			return Some(user)
+		}
+	}
+	None
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for User {
@@ -35,8 +54,8 @@ impl<'r> FromRequest<'r> for User {
 
     async fn from_request(req: &'r Request<'_>) -> request::Outcome<User, Self::Error> {
         req.cookies()
-            .get_private("is_logged_in")
-            .and_then(|cookie| cookie.value().parse().ok())
+            .get_private("user")
+            .and_then(|cookie| user_exists(cookie.value()))
             .or_forward(())
     }
 }
@@ -46,7 +65,7 @@ impl FromStr for User {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s == "true" {
-            Ok(User)
+            Ok(User{username:"".to_string(),password:"".to_string()})
         } else {
             Err(())
         }
@@ -60,19 +79,29 @@ struct UploadData<'v> {
     file: TempFile<'v>,
 }
 
-#[derive(FromForm)]
-struct LoginData {
-    token: String
-}
-
 #[derive(Serialize)]
 struct FilePaths {
     paths: Vec<String>
 }
 
+/** Fetch and parse users from local json file. */
+fn fetch_users() -> Vec<User> {
+	let contents = fs::read_to_string("users.json")
+		.expect("Something went wrong reading the users file");
+	serde_json::from_str(contents.as_str()).expect("Something went wrong parsing the json")
+}
+
 #[get("/")]
-fn index(_user: User) -> Template {
-    Template::render("index", FilePaths { paths: read_dir(&Path::new("files").to_path_buf()).unwrap() })
+fn index(_user: User, jar: &CookieJar<'_>) -> Template {
+	if let Some(user_cookie) = jar.get_private("user") {
+		let username = user_cookie.value().to_string();
+
+		return Template::render("index", FilePaths{
+			paths: read_dir(&Path::new("files").join(username).to_path_buf()).unwrap()
+		})
+	}
+
+	Template::render("index", &Context::default())
 }
 
 #[get("/", rank = 2)]
@@ -86,28 +115,46 @@ fn upload_page(_user: User) -> Template {
 }
 
 #[post("/login", data = "<login_data>")]
-fn login(login_data: Form<LoginData>, jar: &CookieJar<'_>) -> Redirect {
-    if login_data.token == "secret_token" {
-        jar.add_private(Cookie::new("is_logged_in", "true"));
-    }
+fn login(login_data: Form<User>, jar: &CookieJar<'_>) -> Redirect {
+	let user: User = User
+	{
+		username: login_data.username.to_string(),
+		password: login_data.password.to_string()
+	};
+
+	for u in fetch_users() {
+		if user == u {
+			jar.add_private(Cookie::new("user", u.username));
+			break;
+		}
+	}
 
     Redirect::to(uri!(index))
 }
 
 #[post("/logout")]
 fn logout(_user: User, jar: &CookieJar<'_>) -> Redirect {
-    jar.remove_private(Cookie::named("is_logged_in"));
+    jar.remove_private(Cookie::named("user"));
     Redirect::to(uri!(index))
 }
 
 #[post("/upload", data = "<upload>")]
-async fn upload<'r>(ref mut upload: Form<UploadData<'r>>) -> Template {
-    let name = upload.name;
+async fn upload<'r>(ref mut upload: Form<UploadData<'r>>, jar: &CookieJar<'_>) -> Template {
+	let filename = upload.name;
+	if let Some(user_cookie) = jar.get_private("user") {
+		let username = user_cookie.value().to_string();
 
-    match upload.file.copy_to(Path::new("files/").join(name)).await {
-        Ok(_) => Template::render("success", &Context::default()),
-        Err(_) => Template::render("failed", &Context::default()),
-    }
+		fs::create_dir_all("files/".to_string() + username.as_str());
+
+		match upload.file.copy_to(
+			Path::new("files/").join(username).join(filename)
+		).await {
+			Ok(_) => return Template::render("success", &Context::default()),
+			Err(_) => return Template::render("failed", &Context::default()),
+		};
+	}
+
+	Template::render("failed", &Context::default())
 }
 
 #[get("/download/<path..>")]

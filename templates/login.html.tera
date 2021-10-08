@@ -31,7 +31,9 @@
 
           <div class="row">
             <div class="col">
-            {{ m::input(label="Token", type="text", name="token") }}
+            {{ m::input(label="Username", type="text", name="username") }}
+              <!-- required -->
+            {{ m::input(label="Password", type="password", name="password") }}
               <!-- required -->
             </div>
           </div>

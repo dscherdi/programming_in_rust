@@ -11,3 +11,9 @@ Cargo.lock
 
 # Local files folder
 /files/
+
+.DS_Store
+.idea
+files/**
+!files/.gitkeep
+
