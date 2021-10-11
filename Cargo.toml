@@ -1,8 +1,17 @@
 [package]
 name = "webserver"
 version = "0.1.0"
-authors = ["Your Name <student@informatik.hu-berlin.de>", "Your Partner <partner@informatik.hu-berlin.de"]
+authors = ["Xherdi Lika <likaxher@hu-berlin.de>", "Your Partner <partner@informatik.hu-berlin.de"]
 edition = "2018"
+publish = false
 
 [dependencies]
-rocket = "0.4"
+rocket = { path = "./core/lib", features = ["secrets", "json", "msgpack", "uuid"]  }
+serde_json =  "1.0.68"
+evmap = "10.0.2"
+strum_macros = "0.21.1"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+
+[dependencies.rocket_dyn_templates]
+path = "./contrib/dyn_templates"
+features = ["handlebars", "tera"]

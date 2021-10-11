@@ -1,0 +1,51 @@
+{% import "macros" as m %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/static/chota.min.css">
+    <style>
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Home</h1>
+      <br />
+
+      {% if not name %}
+        <a class="button outline primary" href="/register" class="is-full-width" >Register</a>
+        <a class="button outline primary" href="/login" class="is-full-width" >Login</a>
+      {% endif %}
+
+      {% if name %}
+        <a class="button outline primary" href="/upload" class="is-full-width" >Upload new file</a>
+        <a class="button dark" href="/logout" class="is-full-width" >Logout</a>
+        <br/>
+        <div class="container">
+            {% for file in files %}
+               <br/>
+               <div class="row">
+                 <a class="button" href="/files/{{id}}/{{file}}" class="is-full-width"  download>{{file}}</a>
+                 {% if role == "Elevated" %}
+               <form method="post" action="/delete">
+                    <input type="hidden" name="file" value="{{file}}" />
+                    <input type="submit" class="button error" value="Delete"/>
+                 </form>
+                 {% endif %}
+                </div>
+                <br/>
+            {% endfor %}
+        </div>
+
+
+      {% endif %}
+    </div>
+  </body>
+</html>
