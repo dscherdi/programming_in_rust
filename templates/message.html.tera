@@ -4,7 +4,8 @@
 
 {% block content %}
   <div class="container">
-    <h3>Some message</h3>
+    <h3>{{ header }}</h3>
+    <p>{{ content }}</p>
     <a href="/">&lt; Go back</a>
   </div>
 {% endblock content %}
