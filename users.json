@@ -1,0 +1,26 @@
+[
+    {
+      "username": "martin",
+      "password": "123456",
+      "group": "test",
+      "role": "Standard"
+    },
+    {
+      "username": "marta",
+      "password": "654321",
+      "group": "test",
+      "role": "Elevated"
+    },
+    {
+      "username": "john",
+      "password": "abcdef",
+      "group": "test2",
+      "role": "Standard"
+    },
+    {
+      "username": "johanna",
+      "password": "fedcba",
+      "group": "test2",
+      "role": "Elevated"
+    }
+]

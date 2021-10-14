@@ -1,0 +1,5 @@
+<div class="container">
+  <form action="/logout" method="post">
+  	<input type="submit" value="Logout" class="is-full-width" />
+  </form>
+</div>

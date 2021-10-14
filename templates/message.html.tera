@@ -1,0 +1,11 @@
+{% import "macros" as m %}
+
+{% extends "base" %}
+
+{% block content %}
+  <div class="container">
+    <h3>Some message</h3>
+    <a href="/">&lt; Go back</a>
+  </div>
+{% endblock content %}
+<!DOCTYPE html>

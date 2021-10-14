@@ -19,6 +19,7 @@
            name="{{ name }}"
            id="{{ name }}"
            value='{{ self::value_for(name=name) }}'
+           required
            {% if name in errors %} class="error" {% endif %}
     />
 
