@@ -104,8 +104,6 @@ fn logout(_user: UserCookie, jar: &CookieJar<'_>) -> Redirect {
 
 #[post("/upload", data = "<upload>")]
 async fn upload<'r>(user: UserCookie, ref mut upload: Form<UploadData<'r>>) -> Template {
-	let filename = upload.name;
-
     let path = Path::new("files").join(user.group);
     match fs::create_dir_all(&path) {
         Ok(_) => {},
@@ -115,17 +113,20 @@ async fn upload<'r>(user: UserCookie, ref mut upload: Form<UploadData<'r>>) -> T
         ),
     };
 
+    let name = upload.name.to_string();
+    let extension = upload.file.content_type().unwrap().0.sub().as_str().to_string();
+
     match upload.file.copy_to(
-        path.join(filename)
+        path.join(name).with_extension(extension)
     ).await {
         Ok(_) => return Template::render(
             "message",
             &Message { header: "Success!", content: "File was uploaded." }
         ),
-        Err(_) => return Template::render(
+        Err(e) => {println!("{}", e);return Template::render(
             "message",
             &Message { header: "Error!", content: "Something went wrong uploading that file." }
-        ),
+        )},
     }
 }
 
