@@ -33,10 +33,11 @@
           </div>
         </fieldset>
         <br />
-        <input type="submit" value="Submit" class="is-full-width" />
+        <input type="submit" value="Login" class="is-full-width" />
+        <br /><br />
+		<a class="button outline primary is-full-width" href="/register">Register</a>
       </form>
     </div>
-            <a class="button outline primary" href="/register" class="is-full-width" >Register</a>
 
   </body>
 </html>
