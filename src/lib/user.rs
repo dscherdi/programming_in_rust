@@ -19,7 +19,7 @@ pub struct LoginData {
     pub password: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Role {
     Standard,
     Elevated,

@@ -1,18 +1,12 @@
-use rocket::{
-    Route,
-    response::{Redirect},
-    http::{Cookie, CookieJar},
-    form::{Form, FromForm, Context, },
-    fs::{TempFile, NamedFile}
-};
+use rocket::{Route, State, form::{Form, FromForm, Context}, fs::{TempFile, NamedFile}, http::{Cookie, CookieJar}, response::Redirect};
 use std::{
     path::{Path, PathBuf},
     fs
 };
 use rocket_dyn_templates::Template;
-use serde::{Serialize};
+use serde::Serialize;
 
-use crate::{UserCookie, Role, LoginData, read_dir, fetch_users};
+use crate::{UserCookie, Role, LoginData, read_dir, Data};
 
 #[derive(Debug, FromForm)]
 struct UploadData<'v> {
@@ -75,18 +69,18 @@ fn upload_page(_user: UserCookie) -> Template {
 }
 
 #[post("/login", data = "<login_data>")]
-fn login(login_data: Form<LoginData>, jar: &CookieJar<'_>) -> Redirect {
+fn login(login_data: Form<LoginData>, jar: &CookieJar<'_>, data: &State<Data>) -> Redirect {
 	let user = LoginData {
 		username: login_data.username.to_string(),
 		password: login_data.password.to_string()
 	};
 
-	for u in fetch_users() {
-		if user == u {
+	for u in &data.values {
+		if user == *u {
 			jar.add_private(
                 Cookie::new(
                     "user",
-                    serde_json::to_string(&UserCookie { group: u.group, role: u.role }).unwrap()
+                    serde_json::to_string(&UserCookie { group: (*u.group).to_string(), role: u.role }).unwrap()
                 )
             );
 			break;

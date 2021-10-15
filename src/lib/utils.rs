@@ -1,9 +1,13 @@
 use std::{
-    path::{PathBuf},
+    path::PathBuf,
     fs
 };
 
 use crate::UserData;
+
+pub struct Data {
+    pub values: Vec<UserData>,
+}
 
 pub fn read_dir(paths: &[PathBuf]) -> Vec<String> {
     let mut valid: Vec<String> = Vec::new();
@@ -28,8 +32,8 @@ pub fn read_dir(paths: &[PathBuf]) -> Vec<String> {
     valid
 }
 
-pub fn fetch_users() -> Vec<UserData> {
+pub fn fetch_users() -> Data {
 	let contents = fs::read_to_string("users.json")
 		.expect("Something went wrong reading the users file");
-	serde_json::from_str(contents.as_str()).expect("Something went wrong parsing the json")
+	Data { values: serde_json::from_str(contents.as_str()).expect("Something went wrong parsing the json") }
 }
